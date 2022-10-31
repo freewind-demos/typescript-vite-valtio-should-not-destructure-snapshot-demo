@@ -1,10 +1,30 @@
-import React, { FC } from 'react';
+import React, {FC} from 'react';
 import './Hello.pcss';
+import {proxy, useSnapshot} from 'valtio';
 
-type Props = {};
+class Store {
+  user: string = 'aaa';
 
-export const Hello: FC<Props> = ({}) => {
+  get upperUser(): string {
+    return this.user.toUpperCase();
+  }
+
+  changeName(value: string) {
+    this.user = value
+  }
+}
+
+const store = proxy<Store>(new Store());
+
+function hello(): string {
+  return `Hello, ${store.upperUser}`;
+}
+
+export const Hello: FC = () => {
+  const {user} = useSnapshot(store);
+
   return <div className={'Hello'}>
-    <h1>Hello React</h1>
+    <input type={'text'} value={user} onChange={event => store.changeName(event.target.value)}/>
+    <div>{hello()}</div>
   </div>;
 }
