@@ -3,10 +3,10 @@ import './Hello.pcss';
 import {proxy, useSnapshot} from 'valtio';
 
 class Store {
-  user: string = 'aaa';
+  user: string | undefined = undefined;
 
-  get upperUser(): string {
-    return this.user.toUpperCase();
+  hello(): string {
+    return `Hello, ${this.user}`;
   }
 
   changeName(value: string) {
@@ -16,15 +16,23 @@ class Store {
 
 const store = proxy<Store>(new Store());
 
-function hello(): string {
-  return `Hello, ${store.upperUser}`;
-}
 
 export const Hello: FC = () => {
-  const {user} = useSnapshot(store);
+  // Uncaught TypeError: Cannot read properties of undefined (reading 'user')
+  const snap = useSnapshot(store);
+  const {hello} = snap;
 
   return <div className={'Hello'}>
-    <input type={'text'} value={user} onChange={event => store.changeName(event.target.value)}/>
-    <div>{hello()}</div>
+    <input type={'text'} defaultValue={''} onChange={event => store.changeName(event.target.value)}/>
+    <ul>
+      <li>snap.hello(): {snap.hello()}</li>
+      <li>hello: {(() => {
+        try {
+          hello()
+        } catch (error) {
+          return (error as Error).message;
+        }
+      })()}</li>
+    </ul>
   </div>;
 }
